@@ -54,7 +54,7 @@ export function LoginPage() {
               color: 'var(--color-text-primary)',
             }}
           >
-            Boulders
+            Member Portal
           </span>
         </div>
         <ThemeToggle />
@@ -139,7 +139,7 @@ export function LoginPage() {
                   Remember me
                 </label>
                 <a
-                  href="#"
+                  href="/forgot-password"
                   style={{
                     color: 'var(--color-primary)',
                     textDecoration: 'none',
@@ -180,7 +180,7 @@ export function LoginPage() {
               >
                 New member?{' '}
                 <a
-                  href="#"
+                  href="/signup"
                   style={{
                     color: 'var(--color-primary)',
                     textDecoration: 'none',
@@ -208,7 +208,7 @@ export function LoginPage() {
         <p style={{ margin: 0 }}>
           © 2024 Boulders.dk • Member Portal •{' '}
           <a
-            href="#"
+            href="https://boulders.dk/privacy"
             style={{
               color: 'inherit',
               textDecoration: 'none',
@@ -218,7 +218,7 @@ export function LoginPage() {
           </a>
           {' • '}
           <a
-            href="#"
+            href="https://boulders.dk/terms"
             style={{
               color: 'inherit',
               textDecoration: 'none',
