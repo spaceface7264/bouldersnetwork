@@ -411,6 +411,30 @@
   width: 0;
 }
 
+/* Stacked Logo Layout */
+.app-logo--stacked {
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center;
+  gap: var(--spacing-xs) !important;
+}
+
+.app-logo--stacked .app-logo__text {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.app-shell--sidebar-collapsed .app-logo--stacked {
+  align-items: center;
+}
+
+.app-shell--sidebar-collapsed .app-logo--stacked .app-logo__text {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 .app-logo__icon {
   width: 24px;
   height: 24px;

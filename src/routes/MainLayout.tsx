@@ -68,13 +68,13 @@ export function MainLayout() {
           </button>
 
           {/* Logo */}
-          <div className="app-logo">
+          <div className="app-logo app-logo--stacked">
             <img 
               src="https://storage.googleapis.com/boulderscss/logo-flat-white.png" 
               alt="Boulders Logo" 
               className="app-logo-image"
               style={{
-                height: '32px',
+                height: '40px',
                 width: 'auto',
               }}
             />
