@@ -1,32 +1,37 @@
-/* Minimal Card */
 .ui-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  transition: border-color var(--transition);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .ui-card:hover {
-  border-color: var(--color-border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-/* Minimal Button */
 .ui-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   border: 1px solid transparent;
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-weight: 500;
+  padding: calc(var(--spacing-sm) - 2px) var(--spacing-md);
+  font-weight: 600;
   font-size: var(--font-size-sm);
   line-height: 1;
   cursor: pointer;
-  background: var(--color-primary);
-  color: white;
-  transition: all var(--transition);
+  background: var(--color-accent);
+  color: var(--color-bg);
+  transition:
+    background var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .ui-button--sm {
@@ -34,13 +39,27 @@
   font-size: var(--font-size-xs);
 }
 
+.ui-button--md {
+  padding: calc(var(--spacing-sm) - 2px) var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
 .ui-button:hover {
-  background: var(--color-primary-dark);
+  background: var(--color-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .ui-button:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .ui-button--secondary {
@@ -50,8 +69,7 @@
 }
 
 .ui-button--secondary:hover {
-  background: var(--color-surface-elevated);
-  border-color: var(--color-border-strong);
+  background: var(--color-surface);
 }
 
 .ui-button--ghost {
@@ -61,40 +79,35 @@
 }
 
 .ui-button--ghost:hover {
-  background: var(--color-surface-muted);
-  color: var(--color-text-primary);
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--color-accent);
 }
 
-/* Form Elements */
 .ui-input,
 .ui-select,
 .ui-textarea {
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  transition: border-color var(--transition);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .ui-input:focus,
 .ui-select:focus,
 .ui-textarea:focus {
   outline: none;
-  border-color: var(--color-primary);
-}
-
-.ui-input::placeholder,
-.ui-textarea::placeholder {
-  color: var(--color-text-muted);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
 }
 
 .ui-label {
   display: block;
   font-size: var(--font-size-sm);
-  font-weight: 500;
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-xs);
 }
@@ -111,48 +124,44 @@
   font-size: var(--font-size-xs);
 }
 
-/* Toggle */
 .ui-toggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   cursor: pointer;
-  padding: var(--spacing-sm) 0;
 }
 
 .ui-toggle__track {
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
-  background: var(--color-surface-muted);
-  border: 1px solid var(--color-border);
+  width: 40px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--color-border);
   position: relative;
-  transition: all var(--transition);
-  flex-shrink: 0;
+  transition: background var(--transition-base);
 }
 
 .ui-toggle__thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--color-text-primary);
-  transition: transform var(--transition);
+  transition:
+    transform var(--transition-base),
+    background var(--transition-base);
 }
 
 .ui-toggle__track[data-state='on'] {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--color-accent);
 }
 
 .ui-toggle__track[data-state='on'] .ui-toggle__thumb {
-  transform: translateX(20px);
-  background: white;
+  transform: translateX(18px);
+  background: var(--color-bg);
 }
 
-/* Modal */
 .ui-modal__overlay {
   position: fixed;
   inset: 0;
@@ -179,74 +188,10 @@
 .ui-modal__content {
   position: relative;
   z-index: 1;
-  width: min(500px, 100%);
+  width: min(520px, 100%);
   background: var(--color-surface);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-xl);
-}
-
-/* Progress */
-.ui-progress {
-  width: 100%;
-  height: 8px;
-  background: var(--color-surface-muted);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.ui-progress__bar {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: var(--radius);
-  transition: width var(--transition);
-}
-
-/* Badge */
-.ui-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px var(--spacing-xs);
-  border-radius: calc(var(--radius) / 2);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.ui-badge--success {
-  background: rgba(34, 197, 94, 0.1);
-  color: var(--color-success);
-}
-
-.ui-badge--warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
-}
-
-.ui-badge--primary {
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-}
-
-/* Theme Toggle */
-.theme-toggle {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-  font-size: var(--font-size-md);
-}
-
-.theme-toggle:hover {
-  background: var(--color-surface-muted);
-  border-color: var(--color-border-strong);
 }

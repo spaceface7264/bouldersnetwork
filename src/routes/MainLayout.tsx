@@ -27,9 +27,11 @@ export function MainLayout() {
     <div className="app-shell">
       <aside className="app-sidebar">
         <div className="app-logo">
-          <span role="img" aria-label="boulder">
-            🧗
-          </span>
+          <img 
+            src="https://storage.googleapis.com/boulderscss/logo-flat-white.png" 
+            alt="Boulders Logo" 
+            className="app-logo-image"
+          />
           Boulders Member
         </div>
         <nav className="app-nav">

@@ -11,35 +11,35 @@ interface CardProps {
 
 export function Card({ title, subtitle, actions, children, className }: CardProps) {
   return (
-    <div className={cn('ui-card', className)}>
+    <section className={cn('ui-card', className)}>
       {(title || subtitle || actions) && (
         <header
           style={{
             display: 'flex',
-            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            gap: 'var(--spacing-sm)',
+            alignItems: 'center',
+            marginBottom: 'var(--spacing-lg)',
             justifyContent: 'space-between',
-            marginBottom: title || subtitle ? 'var(--spacing-lg)' : 0,
-            gap: 'var(--spacing-md)',
           }}
         >
-          <div style={{ minWidth: 0 }}>
+          <div>
             {title && (
-              <h3
+              <h2
                 style={{
                   margin: 0,
                   fontSize: 'var(--font-size-lg)',
-                  fontWeight: 600,
                   color: 'var(--color-text-primary)',
-                  marginBottom: subtitle ? 'var(--spacing-xs)' : 0,
                 }}
               >
                 {title}
-              </h3>
+              </h2>
             )}
             {subtitle && (
               <p
                 style={{
-                  margin: 0,
+                  marginTop: 'var(--spacing-xxs)',
+                  marginBottom: 0,
                   fontSize: 'var(--font-size-sm)',
                   color: 'var(--color-text-muted)',
                 }}
@@ -48,10 +48,10 @@ export function Card({ title, subtitle, actions, children, className }: CardProp
               </p>
             )}
           </div>
-          {actions && <div>{actions}</div>}
+          {actions && <div style={{ marginLeft: 'auto' }}>{actions}</div>}
         </header>
       )}
-      {children && <div>{children}</div>}
-    </div>
+      <div>{children}</div>
+    </section>
   )
-} 
+}
