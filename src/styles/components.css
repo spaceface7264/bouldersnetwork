@@ -1,0 +1,197 @@
+.ui-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.ui-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  padding: calc(var(--spacing-sm) - 2px) var(--spacing-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  cursor: pointer;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  transition:
+    background var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.ui-button--sm {
+  padding: calc(var(--spacing-xs) - 1px) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+}
+
+.ui-button--md {
+  padding: calc(var(--spacing-sm) - 2px) var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
+.ui-button:hover {
+  background: var(--color-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.ui-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.ui-button--secondary {
+  background: var(--color-surface-muted);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.ui-button--secondary:hover {
+  background: var(--color-surface);
+}
+
+.ui-button--ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.ui-button--ghost:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--color-accent);
+}
+
+.ui-input,
+.ui-select,
+.ui-textarea {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.ui-input:focus,
+.ui-select:focus,
+.ui-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+.ui-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.ui-field-error {
+  margin-top: var(--spacing-xs);
+  color: var(--color-danger);
+  font-size: var(--font-size-xs);
+}
+
+.ui-field-hint {
+  margin-top: var(--spacing-xs);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.ui-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.ui-toggle__track {
+  width: 40px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--color-border);
+  position: relative;
+  transition: background var(--transition-base);
+}
+
+.ui-toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  transition:
+    transform var(--transition-base),
+    background var(--transition-base);
+}
+
+.ui-toggle__track[data-state='on'] {
+  background: var(--color-accent);
+}
+
+.ui-toggle__track[data-state='on'] .ui-toggle__thumb {
+  transform: translateX(18px);
+  background: var(--color-bg);
+}
+
+.ui-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  display: grid;
+  place-items: center;
+  padding: var(--spacing-xl);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.ui-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ui-modal__content {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-xl);
+}
