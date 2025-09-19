@@ -32,7 +32,6 @@ export function MainLayout() {
             alt="Boulders Logo" 
             className="app-logo-image"
           />
-          Boulders Member
         </div>
         <nav className="app-nav">
           {navigation.map((item) => (

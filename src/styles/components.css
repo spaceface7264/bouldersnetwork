@@ -195,3 +195,14 @@
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-xl);
 }
+
+/* Login Page Logo */
+.login-logo {
+  /* Light theme: invert the logo to make it dark */
+  filter: brightness(0) invert(1);
+}
+
+/* Dark theme: keep the logo white */
+[data-theme="dark"] .login-logo {
+  filter: none;
+}
