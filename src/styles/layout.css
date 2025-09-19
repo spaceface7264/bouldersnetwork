@@ -417,6 +417,7 @@
   align-items: center !important;
   text-align: center;
   gap: var(--spacing-xs) !important;
+  position: relative;
 }
 
 .app-logo--stacked .app-logo__text {
@@ -433,6 +434,39 @@
   opacity: 0;
   height: 0;
   overflow: hidden;
+}
+
+/* Logo Image Animations */
+.app-logo-image {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-logo-image--full {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.app-logo-image--compact {
+  opacity: 0;
+  transform: scale(0.8);
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+/* Collapsed State - Show compact logo */
+.app-shell--sidebar-collapsed .app-logo-image--full {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.app-shell--sidebar-collapsed .app-logo-image--compact {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  pointer-events: auto;
 }
 
 .app-logo__icon {

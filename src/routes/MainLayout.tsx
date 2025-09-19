@@ -69,12 +69,23 @@ export function MainLayout() {
 
           {/* Logo */}
           <div className="app-logo app-logo--stacked">
+            {/* Full logo for expanded state */}
             <img 
               src="https://storage.googleapis.com/boulderscss/logo-flat-white.png" 
               alt="Boulders Logo" 
-              className="app-logo-image"
+              className="app-logo-image app-logo-image--full"
               style={{
                 height: '40px',
+                width: 'auto',
+              }}
+            />
+            {/* Compact "B" logo for collapsed state */}
+            <img 
+              src="https://storage.googleapis.com/boulderscss/logo-b-white.png" 
+              alt="Boulders B Logo" 
+              className="app-logo-image app-logo-image--compact"
+              style={{
+                height: '32px',
                 width: 'auto',
               }}
             />
