@@ -1,6 +1,8 @@
 # Boulders Member SPA
 
-A handover-ready React + TypeScript single-page application scaffold for the Boulders climbing community member portal. The frontend ships with typed mock data, a reusable UI system, testing, and deployment automation for GitHub Pages.
+A handover-ready React + TypeScript single-page application scaffold for the Boulders climbing community member portal.
+
+<!-- Force deployment refresh --> The frontend ships with typed mock data, a reusable UI system, testing, and deployment automation for GitHub Pages.
 
 ## Features
 
