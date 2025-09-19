@@ -8,6 +8,7 @@ import { cn } from '@/lib/cn'
 
 const navigation = [
   { path: '/dashboard', label: 'Dashboard', icon: '■' },
+  { path: '/announcements', label: 'Announcements', icon: '★' },
   { path: '/classes', label: 'Classes', icon: '●' },
   { path: '/activity', label: 'Activity', icon: '▲' },
   { path: '/profile', label: 'Profile', icon: '◆' },
@@ -36,12 +37,14 @@ export function MainLayout() {
       )}>
         {/* Mobile overlay */}
         {isMobile && (
-          <div 
-            className="sidebar-overlay" 
+          <button
+            type="button"
+            className="sidebar-overlay"
             onClick={close}
-            style={{ 
+            aria-label="Close navigation"
+            style={{
               opacity: isOpen ? 1 : 0,
-              pointerEvents: isOpen ? 'auto' : 'none' 
+              pointerEvents: isOpen ? 'auto' : 'none',
             }}
           />
         )}
@@ -89,7 +92,6 @@ export function MainLayout() {
                 width: 'auto',
               }}
             />
-            <span className="app-logo__text">Member Portal</span>
           </div>
           
           {/* Member Info */}
@@ -163,7 +165,13 @@ export function MainLayout() {
             </div>
             
             <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center' }}>
-              <Button variant="secondary">View Announcements</Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate('/announcements')}
+              >
+                View Announcements
+              </Button>
               <Button variant="ghost" onClick={handleLogout}>
                 Log out
               </Button>

@@ -27,36 +27,10 @@ export function LoginPage() {
         style={{
           padding: 'var(--spacing-lg) var(--spacing-xl)',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
-          <img 
-            src="https://storage.googleapis.com/boulderscss/logo-flat-white.png" 
-            alt="Boulders Logo" 
-            className="login-logo"
-            style={{
-              height: '32px',
-              width: 'auto',
-            }}
-          />
-          <span
-            style={{
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 600,
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Member Portal
-          </span>
-        </div>
         <ThemeToggle />
       </header>
 
@@ -71,13 +45,39 @@ export function LoginPage() {
       >
         <div style={{ width: '100%', maxWidth: '400px' }}>
           <Card>
-            <div style={{ marginBottom: 'var(--spacing-xl)', textAlign: 'center' }}>
+            {/* Logo at top of login card */}
+            <div style={{ 
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              marginBottom: 'var(--spacing-xl)',
+              gap: 'var(--spacing-sm)'
+            }}>
+              <img 
+                src="https://storage.googleapis.com/boulderscss/logo-flat-white.png" 
+                alt="Boulders Logo" 
+                className="login-logo"
+                style={{
+                  height: '48px',
+                  width: 'auto',
+                }}
+              />
+              <span style={{
+                fontSize: 'var(--font-size-md)',
+                fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                marginBottom: 'var(--spacing-md)'
+              }}>
+                Member Portal
+              </span>
               <h1
                 style={{
                   fontSize: 'var(--font-size-xl)',
                   fontWeight: 600,
                   color: 'var(--color-text-primary)',
                   marginBottom: 'var(--spacing-sm)',
+                  margin: 0,
                 }}
               >
                 Member Login
