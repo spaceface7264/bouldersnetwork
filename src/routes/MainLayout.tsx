@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemberProfile } from '@/hooks/useMemberProfile'
 import { Button } from '@/components/ui/Button'
+import { ThemeToggle } from '@/context/ThemeContext'
 import { cn } from '@/lib/cn'
 
 const navigation = [
@@ -55,7 +56,8 @@ export function MainLayout() {
               Track your climbing journey and upcoming sessions.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center' }}>
+            <ThemeToggle />
             <Button variant="secondary">View Announcements</Button>
             <Button variant="ghost" onClick={handleLogout}>
               Log out
