@@ -13,28 +13,21 @@ export function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'grid',
-        placeItems: 'center',
-        padding: 'var(--spacing-xl)',
-      }}
-    >
+    <div className="login-page">
+      <div className="login-page__background" aria-hidden />
       <Card
+        className="login-page__card"
         title="Boulders Member Login"
         subtitle="Welcome back. Sign in to continue your session."
       >
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: 'grid', gap: 'var(--spacing-md)' }}
-        >
+        <form className="login-page__form" onSubmit={handleSubmit}>
           <Input
             id="email"
             type="email"
             label="Email"
             required
             placeholder="you@example.com"
+            containerClassName="login-page__field login-page__field--1"
           />
           <Input
             id="password"
@@ -42,8 +35,11 @@ export function LoginPage() {
             label="Password"
             required
             placeholder="••••••••"
+            containerClassName="login-page__field login-page__field--2"
           />
-          <Button type="submit">Sign in</Button>
+          <Button className="login-page__submit" type="submit">
+            Sign in
+          </Button>
         </form>
       </Card>
     </div>
