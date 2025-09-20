@@ -2,17 +2,21 @@
 @import './components.css';
 @import './layout.css';
 
+/* Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  color-scheme: dark;
   font-family:
     'Inter',
-    system-ui,
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Reset */
 *,
 *::before,
 *::after {
@@ -21,9 +25,28 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background-color: var(--color-bg);
+  background: var(--color-bg);
   color: var(--color-text-primary);
+  line-height: 1.5;
+  transition:
+    background-color var(--transition),
+    color var(--transition);
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+p {
+  margin: 0;
 }
 
 a {
@@ -31,24 +54,51 @@ a {
   text-decoration: none;
 }
 
-button,
+button {
+  font: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
 input,
 select,
 textarea {
   font: inherit;
-  background: transparent;
 }
 
-img {
-  max-width: 100%;
-  display: block;
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
+/* Selection */
+::selection {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Root */
 #root {
   min-height: 100vh;
-}
-
-::selection {
-  background: var(--color-accent);
-  color: var(--color-bg);
 }

@@ -195,3 +195,114 @@
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-xl);
 }
+
+/* Login Page Logo */
+.login-logo {
+  /* Light theme: invert the logo to make it dark */
+  filter: brightness(0) invert(1);
+}
+
+/* Dark theme: keep the logo white */
+[data-theme='dark'] .login-logo {
+  filter: none;
+}
+
+/* Profile Picture Styles */
+.profile-picture {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-surface-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-picture-initials {
+  font-size: var(--font-size-xxl);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+/* Profile Layout Responsive */
+@media (max-width: 992px) {
+  .profile-overview-grid {
+    grid-template-columns: auto 1fr !important;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-column: 1 / -1;
+    margin-top: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-overview-grid {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+  }
+
+  .profile-picture {
+    margin: 0 auto;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .emergency-preferences-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-picture {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-picture-initials {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* Membership Plan Cards */
+.ui-card.current-plan {
+  position: relative;
+  border: 2px solid var(--color-primary);
+}
+
+.ui-card.popular-plan {
+  position: relative;
+  border: 2px solid var(--color-success);
+}
+
+.plan-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.plan-badge--current {
+  background: var(--color-primary);
+}
+
+.plan-badge--popular {
+  background: var(--color-success);
+}

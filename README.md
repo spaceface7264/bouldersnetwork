@@ -95,3 +95,4 @@ GitHub Actions runs CI on every push/PR (`.github/workflows/ci.yml`) and deploys
 - [`docs/architecture.md`](docs/architecture.md): Architecture overview and data flow
 - [`docs/routes.md`](docs/routes.md): Route map and URL parameters
 - [`docs/ui-tokens.md`](docs/ui-tokens.md): Design tokens and usage notes
+- [`docs/api-reference.md`](docs/api-reference.md): API endpoints and integration guide
