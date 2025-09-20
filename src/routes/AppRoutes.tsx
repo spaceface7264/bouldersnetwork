@@ -3,6 +3,7 @@ import { LoginPage } from '@/pages/login/LoginPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { ClassesPage } from '@/pages/classes/ClassesPage'
 import { ActivityPage } from '@/pages/activity/ActivityPage'
+import { MembershipPage } from '@/pages/membership/MembershipPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
 import { PaymentsPage } from '@/pages/payments/PaymentsPage'
 import { AnnouncementsPage } from '@/pages/announcements/AnnouncementsPage'
@@ -18,6 +19,7 @@ export function AppRoutes() {
         <Route path="/announcements" element={<AnnouncementsPage />} />
         <Route path="/classes" element={<ClassesPage />} />
         <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/membership" element={<MembershipPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/payments" element={<PaymentsPage />} />
       </Route>

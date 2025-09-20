@@ -749,3 +749,49 @@
     margin-top: 0;
   }
 }
+
+/* Membership Page */
+.membership-page {
+  display: grid;
+  gap: var(--spacing-xxl);
+}
+
+.membership-page__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-xl);
+}
+
+.membership-page__header h1 {
+  margin: 0;
+  font-size: var(--font-size-xxl);
+  color: var(--color-text-primary);
+}
+
+.membership-page__header p {
+  margin: var(--spacing-sm) 0 0;
+  color: var(--color-text-muted);
+  max-width: 520px;
+}
+
+.membership-grid {
+  display: grid;
+  gap: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .membership-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .membership-page__header p {
+    margin-top: 0;
+  }
+
+  .membership-grid {
+    grid-template-columns: 1fr;
+  }
+}

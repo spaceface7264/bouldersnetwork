@@ -110,6 +110,52 @@ GET /customers/{customerId}/subscriptions
 Authorization: Bearer {accessToken}
 ```
 
+#### Freeze Membership
+```http
+POST /subscriptions/{subscriptionId}/freeze
+Authorization: Bearer {accessToken}
+Content-Type: application/json
+
+{
+  "freezeUntil": "2024-12-31"
+}
+```
+
+#### Unfreeze Membership
+```http
+POST /subscriptions/{subscriptionId}/unfreeze
+Authorization: Bearer {accessToken}
+```
+
+#### Cancel Membership
+```http
+POST /subscriptions/{subscriptionId}/cancel
+Authorization: Bearer {accessToken}
+Content-Type: application/json
+
+{
+  "cancellationDate": "2024-01-31",
+  "reason": "Moving to another city"
+}
+```
+
+#### Change Membership Plan
+```http
+PUT /subscriptions/{subscriptionId}/change-plan
+Authorization: Bearer {accessToken}
+Content-Type: application/json
+
+{
+  "planId": "premium-monthly"
+}
+```
+
+#### List Membership Plans
+```http
+GET /membership/plans
+Authorization: Bearer {accessToken}
+```
+
 ### 4. Resources & Facilities
 
 #### List Available Resources
@@ -183,6 +229,53 @@ interface Payment {
   description: string
   status: 'pending' | 'completed' | 'failed'
   method: 'card' | 'bank_transfer' | 'cash'
+}
+```
+
+### Membership
+```typescript
+interface Membership {
+  id: string
+  customerId: string
+  planId: string
+  planName: string
+  status: 'active' | 'frozen' | 'cancelled' | 'expired'
+  startDate: string
+  renewalDate: string
+  freezeDate?: string
+  freezeEndDate?: string
+  cancellationDate?: string
+  monthlyPrice: number
+  currency: string
+  features: string[]
+}
+```
+
+### MembershipPlan
+```typescript
+interface MembershipPlan {
+  id: string
+  name: string
+  description: string
+  monthlyPrice: number
+  yearlyPrice: number
+  features: string[]
+  isPopular?: boolean
+}
+```
+
+### Invoice
+```typescript
+interface Invoice {
+  id: string
+  membershipId: string
+  amount: number
+  currency: string
+  status: 'paid' | 'pending' | 'overdue' | 'failed'
+  issueDate: string
+  dueDate: string
+  paidDate?: string
+  downloadUrl?: string
 }
 ```
 
