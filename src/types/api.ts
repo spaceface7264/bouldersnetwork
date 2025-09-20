@@ -23,6 +23,37 @@ export interface MemberProfile {
   }
 }
 
+// For API requests to update profile
+export interface MemberProfileUpdate {
+  name?: string
+  email?: string
+  phone?: string
+  emergencyContact?: {
+    name: string
+    phone: string
+  }
+  preferences?: {
+    newsletter: boolean
+    reminders: boolean
+    personalCoaching: boolean
+  }
+}
+
+// For form validation
+export interface ProfileFormData {
+  name: string
+  email: string
+  phone: string
+  emergencyContactName: string
+  emergencyContactPhone: string
+}
+
+// API response wrapper
+export interface ProfileUpdateResponse {
+  member: MemberProfile
+  message: string
+}
+
 export interface ClassSchedule {
   id: string
   name: string

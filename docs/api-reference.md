@@ -50,6 +50,34 @@ GET /customers/{customerId}
 Authorization: Bearer {accessToken}
 ```
 
+**Response:**
+```json
+{
+  "id": "string",
+  "name": "string", 
+  "email": "string",
+  "phone": "string",
+  "avatarUrl": "string",
+  "membershipTier": "Basic" | "Unlimited" | "Family",
+  "joinDate": "2021-03-15",
+  "nextBillingDate": "2024-08-01",
+  "emergencyContact": {
+    "name": "string",
+    "phone": "string"
+  },
+  "preferences": {
+    "newsletter": boolean,
+    "reminders": boolean,
+    "personalCoaching": boolean
+  },
+  "stats": {
+    "checkInsThisMonth": number,
+    "classesAttended": number,
+    "badgesEarned": number
+  }
+}
+```
+
 #### Update Customer Profile
 ```http
 PUT /customers/{customerId}
@@ -58,10 +86,36 @@ Content-Type: application/json
 
 {
   "name": "string",
-  "email": "string",
-  "phone": "string"
+  "email": "string", 
+  "phone": "string",
+  "emergencyContact": {
+    "name": "string",
+    "phone": "string"
+  },
+  "preferences": {
+    "newsletter": boolean,
+    "reminders": boolean,
+    "personalCoaching": boolean
+  }
 }
 ```
+
+**Response:**
+```json
+{
+  "member": {
+    // Updated customer profile object (same structure as GET)
+  },
+  "message": "Profile updated successfully"
+}
+```
+
+**Validation:**
+- `name`: Required, min 2 characters
+- `email`: Required, valid email format
+- `phone`: Required, valid phone format
+- `emergencyContact.name`: Required
+- `emergencyContact.phone`: Required
 
 ### 2. Bookings & Activities
 

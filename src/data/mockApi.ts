@@ -8,7 +8,8 @@ import {
 
 const delay = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const memberProfile: MemberProfile = {
+// Mutable member profile for updates
+let memberProfile: MemberProfile = {
   id: 'member-001',
   name: 'Alex Johnson',
   avatarUrl: 'https://avatars.dicebear.com/api/initials/AJ.svg',
@@ -212,5 +213,14 @@ export const mockApi = {
   async fetchPayments(): Promise<PaymentsResponse> {
     await delay()
     return paymentsResponse
+  },
+  
+  // Profile update methods
+  getCurrentProfile(): MemberProfile {
+    return { ...memberProfile }
+  },
+  
+  updateProfile(updates: Partial<MemberProfile>): void {
+    memberProfile = { ...memberProfile, ...updates }
   },
 }
