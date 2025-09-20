@@ -203,7 +203,7 @@
 }
 
 /* Dark theme: keep the logo white */
-[data-theme="dark"] .login-logo {
+[data-theme='dark'] .login-logo {
   filter: none;
 }
 
@@ -238,7 +238,7 @@
   .profile-overview-grid {
     grid-template-columns: auto 1fr !important;
   }
-  
+
   .profile-stats {
     grid-template-columns: repeat(3, 1fr) !important;
     grid-column: 1 / -1;
@@ -251,15 +251,15 @@
     grid-template-columns: 1fr !important;
     text-align: center;
   }
-  
+
   .profile-picture {
     margin: 0 auto;
   }
-  
+
   .profile-stats {
     grid-template-columns: repeat(3, 1fr) !important;
   }
-  
+
   .emergency-preferences-grid {
     grid-template-columns: 1fr !important;
   }
@@ -270,8 +270,39 @@
     width: 80px;
     height: 80px;
   }
-  
+
   .profile-picture-initials {
     font-size: var(--font-size-lg);
   }
+}
+
+/* Membership Plan Cards */
+.ui-card.current-plan {
+  position: relative;
+  border: 2px solid var(--color-primary);
+}
+
+.ui-card.popular-plan {
+  position: relative;
+  border: 2px solid var(--color-success);
+}
+
+.plan-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.plan-badge--current {
+  background: var(--color-primary);
+}
+
+.plan-badge--popular {
+  background: var(--color-success);
 }
