@@ -17,9 +17,21 @@ export function formatTime(date: string | Date) {
 }
 
 export function formatCurrency(amount: number, currency: string = 'USD') {
-  return new Intl.NumberFormat('en-US', {
+  // Use appropriate locale based on currency
+  const locale = currency === 'DKK' ? 'da-DK' : 'en-US'
+  
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
   }).format(amount)
 }
+
+// Default export object for convenience
+const format = {
+  date: formatDate,
+  time: formatTime,
+  currency: formatCurrency,
+}
+
+export default format

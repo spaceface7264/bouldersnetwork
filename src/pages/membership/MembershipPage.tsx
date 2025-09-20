@@ -5,7 +5,7 @@ import { Modal } from '@/components/ui/Modal'
 import { useMembershipData, useMembershipAction } from '@/hooks/useMembershipData'
 import { useModal } from '@/context/ModalContext'
 import { MembershipPlan, MembershipAction } from '@/types/api'
-import { format } from '@/lib/format'
+import { formatDate, formatCurrency } from '@/lib/format'
 
 export function MembershipPage() {
   const { data: membership, isLoading } = useMembershipData()
@@ -156,20 +156,20 @@ export function MembershipPage() {
             <div>
               <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>Price</div>
               <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
-                {format.currency(currentSubscription.price)} / {currentSubscription.billingCycle}
+                {formatCurrency(currentSubscription.price, currentSubscription.currency)} / {currentSubscription.billingCycle}
               </div>
             </div>
             <div>
               <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>Next Renewal</div>
               <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
-                {format.date(currentSubscription.renewalDate)}
+                {formatDate(currentSubscription.renewalDate)}
               </div>
             </div>
             {currentSubscription.pausedUntil && (
               <div>
                 <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>Paused Until</div>
                 <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)', color: 'var(--color-warning)' }}>
-                  {format.date(currentSubscription.pausedUntil)}
+                  {formatDate(currentSubscription.pausedUntil)}
                 </div>
               </div>
             )}
@@ -186,7 +186,7 @@ export function MembershipPage() {
                 <div>
                   <div style={{ fontWeight: 600 }}>Upcoming Payment</div>
                   <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-                    {format.currency(upcomingPayment.amount)} on {format.date(upcomingPayment.date)}
+                    {formatCurrency(upcomingPayment.amount)} on {formatDate(upcomingPayment.date)}
                   </div>
                 </div>
                 <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
@@ -261,12 +261,12 @@ export function MembershipPage() {
                   </div>
 
                   <div>
-                    <div style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 700, color: 'var(--color-primary)' }}>
-                      {format.currency(plan.price)}
-                      <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 400, color: 'var(--color-text-muted)' }}>
-                        /{plan.billingCycle}
-                      </span>
-                    </div>
+                  <div style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 700, color: 'var(--color-primary)' }}>
+                    {formatCurrency(plan.price, plan.currency)}
+                    <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 400, color: 'var(--color-text-muted)' }}>
+                      /{plan.billingCycle}
+                    </span>
+                  </div>
                   </div>
 
                   <ul style={{ 
@@ -335,7 +335,7 @@ export function MembershipPage() {
                 <div>
                   <div style={{ fontWeight: 600 }}>{invoice.description}</div>
                   <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-                    {format.date(invoice.issueDate)} • {format.currency(invoice.amount)}
+                    {formatDate(invoice.issueDate)} • {formatCurrency(invoice.amount, invoice.currency)}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
