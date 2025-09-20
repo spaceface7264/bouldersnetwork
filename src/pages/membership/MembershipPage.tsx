@@ -1,553 +1,439 @@
-import { useState, useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Select } from '@/components/ui/Select'
 import { Modal } from '@/components/ui/Modal'
+import { useMembershipData, useMembershipAction } from '@/hooks/useMembershipData'
 import { useModal } from '@/context/ModalContext'
+import { MembershipPlan, MembershipAction } from '@/types/api'
 import { format } from '@/lib/format'
 
-interface Membership {
-  id: string
-  customerId: string
-  planId: string
-  planName: string
-  status: 'active' | 'frozen' | 'cancelled' | 'expired'
-  startDate: string
-  renewalDate: string
-  freezeDate?: string
-  freezeEndDate?: string
-  cancellationDate?: string
-  monthlyPrice: number
-  currency: string
-  features: string[]
-}
-
-interface MembershipPlan {
-  id: string
-  name: string
-  description: string
-  monthlyPrice: number
-  yearlyPrice: number
-  features: string[]
-  isPopular?: boolean
-}
-
-interface Invoice {
-  id: string
-  membershipId: string
-  amount: number
-  currency: string
-  status: 'paid' | 'pending' | 'overdue' | 'failed'
-  issueDate: string
-  dueDate: string
-  paidDate?: string
-  downloadUrl?: string
-}
-
-interface MembershipError {
-  errorCode: string
-  errorMessage: string
-  fieldErrors?: Array<{
-    field: string
-    errorCode: string
-    errorMessage: string
-  }>
-}
-
-// API functions
-async function fetchMembership(): Promise<Membership> {
-  const token = localStorage.getItem('accessToken')
-  const response = await fetch('/api/ver3/customers/current/subscriptions', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch membership')
-  }
-
-  const data = await response.json()
-  return data[0] // Assuming single active membership
-}
-
-async function fetchMembershipPlans(): Promise<MembershipPlan[]> {
-  const token = localStorage.getItem('accessToken')
-  const response = await fetch('/api/ver3/membership/plans', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch membership plans')
-  }
-
-  return response.json()
-}
-
-async function fetchInvoices(membershipId: string): Promise<Invoice[]> {
-  const token = localStorage.getItem('accessToken')
-  const response = await fetch(`/api/ver3/customers/current/payments?subscriptionId=${membershipId}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch invoices')
-  }
-
-  return response.json()
-}
-
-async function freezeMembership(membershipId: string, freezeUntil: string): Promise<void> {
-  const token = localStorage.getItem('accessToken')
-  const response = await fetch(`/api/ver3/subscriptions/${membershipId}/freeze`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ freezeUntil }),
-  })
-
-  if (!response.ok) {
-    const error: MembershipError = await response.json()
-    throw error
-  }
-}
-
-async function unfreezemembership(membershipId: string): Promise<void> {
-  const token = localStorage.getItem('accessToken')
-  const response = await fetch(`/api/ver3/subscriptions/${membershipId}/unfreeze`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    const error: MembershipError = await response.json()
-    throw error
-  }
-}
-
-async function cancelMembership(membershipId: string, cancellationDate: string, reason?: string): Promise<void> {
-  const token = localStorage.getItem('accessToken')
-  const response = await fetch(`/api/ver3/subscriptions/${membershipId}/cancel`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ cancellationDate, reason }),
-  })
-
-  if (!response.ok) {
-    const error: MembershipError = await response.json()
-    throw error
-  }
-}
-
-async function changeMembershipPlan(membershipId: string, newPlanId: string): Promise<void> {
-  const token = localStorage.getItem('accessToken')
-  const response = await fetch(`/api/ver3/subscriptions/${membershipId}/change-plan`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ planId: newPlanId }),
-  })
-
-  if (!response.ok) {
-    const error: MembershipError = await response.json()
-    throw error
-  }
-}
-
 export function MembershipPage() {
+  const { data: membership, isLoading } = useMembershipData()
+  const membershipAction = useMembershipAction()
   const { openModal, closeModal } = useModal()
-  const queryClient = useQueryClient()
-  const [selectedPlan, setSelectedPlan] = useState<string>('')
-  const [freezeUntil, setFreezeUntil] = useState<string>('')
-  const [cancellationReason, setCancellationReason] = useState<string>('')
+  const [selectedAction, setSelectedAction] = useState<MembershipAction | null>(null)
 
-  // Queries
-  const { data: membership, isLoading: membershipLoading, error: membershipError } = useQuery({
-    queryKey: ['membership'],
-    queryFn: fetchMembership,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
-
-  const { data: plans = [], isLoading: plansLoading } = useQuery({
-    queryKey: ['membership-plans'],
-    queryFn: fetchMembershipPlans,
-    staleTime: 30 * 60 * 1000, // 30 minutes
-  })
-
-  const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
-    queryKey: ['invoices', membership?.id],
-    queryFn: () => membership ? fetchInvoices(membership.id) : Promise.resolve([]),
-    enabled: !!membership?.id,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  })
-
-  // Mutations
-  const freezeMutation = useMutation({
-    mutationFn: (freezeUntil: string) => membership ? freezeMembership(membership.id, freezeUntil) : Promise.reject(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership'] })
-      closeModal()
-    },
-  })
-
-  const unfreezeMutation = useMutation({
-    mutationFn: () => membership ? unfreezemembership(membership.id) : Promise.reject(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership'] })
-    },
-  })
-
-  const cancelMutation = useMutation({
-    mutationFn: () => membership ? cancelMembership(membership.id, new Date().toISOString(), cancellationReason) : Promise.reject(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership'] })
-      closeModal()
-    },
-  })
-
-  const changePlanMutation = useMutation({
-    mutationFn: (newPlanId: string) => membership ? changeMembershipPlan(membership.id, newPlanId) : Promise.reject(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership'] })
-      closeModal()
-    },
-  })
-
-  function handleFreezeMembership() {
-    openModal(
-      <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
-        <h2>Freeze Membership</h2>
-        <p>Your membership will be paused and you won't be charged during the freeze period.</p>
-        
-        <div>
-          <label htmlFor="freeze-until">Freeze until:</label>
-          <input
-            id="freeze-until"
-            type="date"
-            value={freezeUntil}
-            onChange={(e) => setFreezeUntil(e.target.value)}
-            min={new Date().toISOString().split('T')[0]}
-            style={{
-              width: '100%',
-              padding: 'var(--spacing-sm)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius)',
-              marginTop: 'var(--spacing-xs)',
-            }}
-          />
-        </div>
-
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)', justifyContent: 'flex-end' }}>
-          <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-          <Button 
-            onClick={() => freezeUntil && freezeMutation.mutate(freezeUntil)}
-            disabled={!freezeUntil || freezeMutation.isPending}
-          >
-            {freezeMutation.isPending ? 'Freezing...' : 'Freeze Membership'}
-          </Button>
-        </div>
-      </div>
-    )
+  const handleFreezeMembership = () => {
+    setSelectedAction({ type: 'freeze', duration: 30 })
+    openModal('freeze-membership')
   }
 
-  function handleCancelMembership() {
-    openModal(
-      <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
-        <h2>Cancel Membership</h2>
-        <p style={{ color: 'var(--color-danger)' }}>
-          <strong>Warning:</strong> This action cannot be undone. Your membership will be cancelled immediately.
-        </p>
-        
-        <div>
-          <label htmlFor="cancellation-reason">Reason for cancellation (optional):</label>
-          <textarea
-            id="cancellation-reason"
-            value={cancellationReason}
-            onChange={(e) => setCancellationReason(e.target.value)}
-            placeholder="Help us improve by telling us why you're cancelling..."
-            style={{
-              width: '100%',
-              padding: 'var(--spacing-sm)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius)',
-              marginTop: 'var(--spacing-xs)',
-              minHeight: '80px',
-              resize: 'vertical',
-            }}
-          />
-        </div>
-
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)', justifyContent: 'flex-end' }}>
-          <Button variant="ghost" onClick={closeModal}>Keep Membership</Button>
-          <Button 
-            variant="ghost"
-            onClick={() => cancelMutation.mutate()}
-            disabled={cancelMutation.isPending}
-            style={{ color: 'var(--color-danger)' }}
-          >
-            {cancelMutation.isPending ? 'Cancelling...' : 'Cancel Membership'}
-          </Button>
-        </div>
-      </div>
-    )
+  const handleCancelMembership = () => {
+    setSelectedAction({ type: 'cancel' })
+    openModal('cancel-membership')
   }
 
-  function handleChangePlan() {
-    openModal(
-      <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
-        <h2>Change Membership Plan</h2>
-        <p>Select a new plan. Changes will be applied on your next billing cycle.</p>
-        
-        <div>
-          <label htmlFor="plan-select">New Plan:</label>
-          <Select
-            id="plan-select"
-            value={selectedPlan}
-            onChange={(e) => setSelectedPlan(e.target.value)}
-            style={{ marginTop: 'var(--spacing-xs)' }}
-          >
-            <option value="">Select a plan</option>
-            {plans.map((plan) => (
-              <option key={plan.id} value={plan.id}>
-                {plan.name} - {format.currency(plan.monthlyPrice)}/month
-              </option>
-            ))}
-          </Select>
-        </div>
-
-        {selectedPlan && (
-          <div style={{ 
-            padding: 'var(--spacing-md)', 
-            background: 'var(--color-surface-muted)', 
-            borderRadius: 'var(--radius)' 
-          }}>
-            {(() => {
-              const plan = plans.find(p => p.id === selectedPlan)
-              return plan ? (
-                <div>
-                  <h4>{plan.name}</h4>
-                  <p>{plan.description}</p>
-                  <ul>
-                    {plan.features.map((feature, index) => (
-                      <li key={index}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null
-            })()}
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)', justifyContent: 'flex-end' }}>
-          <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-          <Button 
-            onClick={() => selectedPlan && changePlanMutation.mutate(selectedPlan)}
-            disabled={!selectedPlan || changePlanMutation.isPending}
-          >
-            {changePlanMutation.isPending ? 'Changing...' : 'Change Plan'}
-          </Button>
-        </div>
-      </div>
-    )
+  const handleChangePlan = (planId: string, isUpgrade: boolean) => {
+    setSelectedAction({ 
+      type: isUpgrade ? 'upgrade' : 'downgrade', 
+      planId 
+    })
+    openModal('change-plan')
   }
 
-  if (membershipLoading) {
+  const confirmAction = async () => {
+    if (!selectedAction) return
+
+    try {
+      await membershipAction.mutateAsync(selectedAction)
+      closeModal()
+      setSelectedAction(null)
+    } catch (error) {
+      console.error('Failed to execute membership action:', error)
+    }
+  }
+
+  if (isLoading) {
     return (
-      <div className="membership-page">
-        <div style={{ textAlign: 'center', padding: 'var(--spacing-xxl)' }}>
-          Loading membership information...
-        </div>
-      </div>
-    )
-  }
-
-  if (membershipError) {
-    return (
-      <div className="membership-page">
-        <Card>
-          <div style={{ textAlign: 'center', color: 'var(--color-danger)' }}>
-            <h2>Error Loading Membership</h2>
-            <p>We couldn't load your membership information. Please try again later.</p>
-          </div>
-        </Card>
+      <div style={{ padding: 'var(--spacing-xl)' }}>
+        <div>Loading membership information...</div>
       </div>
     )
   }
 
   if (!membership) {
     return (
-      <div className="membership-page">
-        <Card>
-          <div style={{ textAlign: 'center' }}>
-            <h2>No Active Membership</h2>
-            <p>You don't have an active membership. Contact support to get started.</p>
-          </div>
-        </Card>
+      <div style={{ padding: 'var(--spacing-xl)' }}>
+        <div>Unable to load membership information.</div>
       </div>
     )
   }
 
+  const { currentSubscription, availablePlans, recentInvoices, upcomingPayment } = membership
+  const isActive = currentSubscription.status === 'active'
+  const isPaused = currentSubscription.status === 'paused'
+
   return (
-    <div className="membership-page">
-      <div className="membership-page__header">
-        <div>
-          <h1>Membership Management</h1>
-          <p>Manage your climbing membership, billing, and account settings</p>
-        </div>
+    <div style={{ padding: 'var(--spacing-xl)', display: 'grid', gap: 'var(--spacing-xl)' }}>
+      {/* Page Header */}
+      <div>
+        <h1 style={{ 
+          fontSize: 'var(--font-size-xxl)', 
+          margin: 0, 
+          marginBottom: 'var(--spacing-sm)',
+          color: 'var(--color-text-primary)' 
+        }}>
+          Membership Management
+        </h1>
+        <p style={{ 
+          color: 'var(--color-text-muted)', 
+          margin: 0,
+          fontSize: 'var(--font-size-md)' 
+        }}>
+          Manage your climbing membership, view invoices, and modify your plan
+        </p>
       </div>
 
-      <div className="membership-grid">
-        {/* Current Membership */}
-        <Card>
-          <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
+      {/* Current Membership */}
+      <Card>
+        <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <h2>Current Membership</h2>
-              <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Plan:</span>
-                  <strong>{membership.planName}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Status:</span>
-                  <span style={{ 
-                    color: membership.status === 'active' ? 'var(--color-success)' : 
-                           membership.status === 'frozen' ? 'var(--color-warning)' : 'var(--color-danger)' 
-                  }}>
-                    {membership.status.charAt(0).toUpperCase() + membership.status.slice(1)}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Monthly Price:</span>
-                  <strong>{format.currency(membership.monthlyPrice)} {membership.currency}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Next Renewal:</span>
-                  <span>{format.date(membership.renewalDate)}</span>
-                </div>
-                {membership.status === 'frozen' && membership.freezeEndDate && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Freeze Ends:</span>
-                    <span>{format.date(membership.freezeEndDate)}</span>
-                  </div>
-                )}
+              <h2 style={{ 
+                fontSize: 'var(--font-size-lg)', 
+                margin: 0, 
+                marginBottom: 'var(--spacing-xs)' 
+              }}>
+                Current Membership
+              </h2>
+              <div style={{ 
+                display: 'inline-flex', 
+                padding: 'var(--spacing-xs) var(--spacing-sm)',
+                borderRadius: 'var(--radius)',
+                background: isActive ? 'var(--color-success)' : isPaused ? 'var(--color-warning)' : 'var(--color-danger)',
+                color: 'white',
+                fontSize: 'var(--font-size-xs)',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                {currentSubscription.status.replace('_', ' ')}
               </div>
             </div>
-
-            <div style={{ display: 'grid', gap: 'var(--spacing-sm)' }}>
-              <h3>Features Included:</h3>
-              <ul style={{ margin: 0, paddingLeft: 'var(--spacing-lg)' }}>
-                {membership.features.map((feature, index) => (
-                  <li key={index}>{feature}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div style={{ 
-              display: 'grid', 
-              gap: 'var(--spacing-sm)', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' 
-            }}>
-              {membership.status === 'active' && (
+            
+            <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+              {isActive && (
                 <>
-                  <Button variant="secondary" onClick={handleFreezeMembership}>
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={handleFreezeMembership}
+                    disabled={membershipAction.isPending}
+                  >
                     Freeze
                   </Button>
-                  <Button variant="secondary" onClick={handleChangePlan}>
-                    Change Plan
-                  </Button>
-                  <Button variant="ghost" onClick={handleCancelMembership}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleCancelMembership}
+                    disabled={membershipAction.isPending}
+                    style={{ color: 'var(--color-danger)' }}
+                  >
                     Cancel
                   </Button>
                 </>
               )}
-              {membership.status === 'frozen' && (
+              {isPaused && (
                 <Button 
-                  onClick={() => unfreezeMutation.mutate()}
-                  disabled={unfreezeMutation.isPending}
+                  variant="primary" 
+                  size="sm"
+                  onClick={() => confirmAction()}
+                  disabled={membershipAction.isPending}
                 >
-                  {unfreezeMutation.isPending ? 'Unfreezing...' : 'Unfreeze'}
+                  Resume
                 </Button>
               )}
             </div>
           </div>
-        </Card>
 
-        {/* Recent Invoices */}
-        <Card>
-          <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
-            <h2>Recent Invoices</h2>
-            
-            {invoicesLoading ? (
-              <div>Loading invoices...</div>
-            ) : invoices.length === 0 ? (
-              <p style={{ color: 'var(--color-text-muted)' }}>No invoices found.</p>
-            ) : (
-              <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-                {invoices.slice(0, 5).map((invoice) => (
-                  <div 
-                    key={invoice.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: 'var(--spacing-sm)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius)',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 500 }}>
-                        {format.currency(invoice.amount)} {invoice.currency}
-                      </div>
-                      <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>
-                        {format.date(invoice.issueDate)}
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ 
-                        color: invoice.status === 'paid' ? 'var(--color-success)' : 
-                               invoice.status === 'pending' ? 'var(--color-warning)' : 'var(--color-danger)' 
-                      }}>
-                        {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-                      </div>
-                      {invoice.downloadUrl && (
-                        <a 
-                          href={invoice.downloadUrl}
-                          style={{ 
-                            fontSize: 'var(--font-size-sm)', 
-                            color: 'var(--color-primary)',
-                            textDecoration: 'none'
-                          }}
-                        >
-                          Download
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-lg)' }}>
+            <div>
+              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>Plan</div>
+              <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                {currentSubscription.planName}
+              </div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>Price</div>
+              <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                {format.currency(currentSubscription.price)} / {currentSubscription.billingCycle}
+              </div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>Next Renewal</div>
+              <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)' }}>
+                {format.date(currentSubscription.renewalDate)}
+              </div>
+            </div>
+            {currentSubscription.pausedUntil && (
+              <div>
+                <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>Paused Until</div>
+                <div style={{ fontWeight: 600, fontSize: 'var(--font-size-lg)', color: 'var(--color-warning)' }}>
+                  {format.date(currentSubscription.pausedUntil)}
+                </div>
               </div>
             )}
           </div>
-        </Card>
+
+          {upcomingPayment && (
+            <div style={{ 
+              padding: 'var(--spacing-md)', 
+              background: 'var(--color-surface-muted)', 
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--color-border)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>Upcoming Payment</div>
+                  <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                    {format.currency(upcomingPayment.amount)} on {format.date(upcomingPayment.date)}
+                  </div>
+                </div>
+                <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                  {upcomingPayment.method}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Available Plans */}
+      <div>
+        <h2 style={{ 
+          fontSize: 'var(--font-size-lg)', 
+          margin: 0, 
+          marginBottom: 'var(--spacing-lg)',
+          color: 'var(--color-text-primary)' 
+        }}>
+          Change Plan
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-lg)' }}>
+          {availablePlans.map((plan) => {
+            const isCurrent = plan.id === currentSubscription.planId
+            const isUpgrade = plan.price > currentSubscription.price
+            
+            return (
+              <Card key={plan.id} style={{ 
+                position: 'relative',
+                border: isCurrent ? '2px solid var(--color-primary)' : plan.isPopular ? '2px solid var(--color-success)' : undefined
+              }}>
+                {plan.isPopular && !isCurrent && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'var(--color-success)',
+                    color: 'white',
+                    padding: 'var(--spacing-xs) var(--spacing-sm)',
+                    borderRadius: 'var(--radius)',
+                    fontSize: 'var(--font-size-xs)',
+                    fontWeight: 600
+                  }}>
+                    POPULAR
+                  </div>
+                )}
+                
+                {isCurrent && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'var(--color-primary)',
+                    color: 'white',
+                    padding: 'var(--spacing-xs) var(--spacing-sm)',
+                    borderRadius: 'var(--radius)',
+                    fontSize: 'var(--font-size-xs)',
+                    fontWeight: 600
+                  }}>
+                    CURRENT PLAN
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gap: 'var(--spacing-md)', padding: 'var(--spacing-md) 0' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{plan.name}</h3>
+                    <p style={{ margin: 'var(--spacing-xs) 0 0', color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 700, color: 'var(--color-primary)' }}>
+                      {format.currency(plan.price)}
+                      <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 400, color: 'var(--color-text-muted)' }}>
+                        /{plan.billingCycle}
+                      </span>
+                    </div>
+                  </div>
+
+                  <ul style={{ 
+                    margin: 0, 
+                    padding: 0, 
+                    listStyle: 'none',
+                    display: 'grid',
+                    gap: 'var(--spacing-xs)'
+                  }}>
+                    {plan.features.map((feature, index) => (
+                      <li key={index} style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 'var(--spacing-xs)',
+                        fontSize: 'var(--font-size-sm)'
+                      }}>
+                        <span style={{ color: 'var(--color-success)' }}>✓</span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {!isCurrent && (
+                    <Button
+                      variant={isUpgrade ? "primary" : "secondary"}
+                      onClick={() => handleChangePlan(plan.id, isUpgrade)}
+                      disabled={membershipAction.isPending}
+                      style={{ marginTop: 'var(--spacing-sm)' }}
+                    >
+                      {isUpgrade ? 'Upgrade' : 'Downgrade'} to {plan.name}
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            )
+          })}
+        </div>
       </div>
+
+      {/* Recent Invoices */}
+      <Card>
+        <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ 
+              fontSize: 'var(--font-size-lg)', 
+              margin: 0,
+              color: 'var(--color-text-primary)' 
+            }}>
+              Recent Invoices
+            </h2>
+            <Button variant="ghost" size="sm">
+              View All
+            </Button>
+          </div>
+
+          <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
+            {recentInvoices.map((invoice) => (
+              <div key={invoice.id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 'var(--spacing-md)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius)'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>{invoice.description}</div>
+                  <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                    {format.date(invoice.issueDate)} • {format.currency(invoice.amount)}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+                  <div style={{
+                    padding: 'var(--spacing-xs) var(--spacing-sm)',
+                    borderRadius: 'var(--radius)',
+                    background: invoice.status === 'paid' ? 'var(--color-success)' : 'var(--color-warning)',
+                    color: 'white',
+                    fontSize: 'var(--font-size-xs)',
+                    fontWeight: 600,
+                    textTransform: 'uppercase'
+                  }}>
+                    {invoice.status}
+                  </div>
+                  <Button variant="ghost" size="sm">
+                    Download
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {/* Modals */}
+      <Modal id="freeze-membership">
+        <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
+          <div>
+            <h3 style={{ margin: 0, marginBottom: 'var(--spacing-sm)' }}>Freeze Membership</h3>
+            <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+              Your membership will be paused for 30 days. You can resume at any time.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)', justifyContent: 'flex-end' }}>
+            <Button variant="ghost" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={confirmAction}
+              disabled={membershipAction.isPending}
+            >
+              {membershipAction.isPending ? 'Processing...' : 'Confirm Freeze'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal id="cancel-membership">
+        <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
+          <div>
+            <h3 style={{ margin: 0, marginBottom: 'var(--spacing-sm)' }}>Cancel Membership</h3>
+            <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+              Are you sure you want to cancel your membership? This action cannot be undone.
+              Your membership will remain active until your next billing date.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)', justifyContent: 'flex-end' }}>
+            <Button variant="ghost" onClick={closeModal}>
+              Keep Membership
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={confirmAction}
+              disabled={membershipAction.isPending}
+              style={{ background: 'var(--color-danger)' }}
+            >
+              {membershipAction.isPending ? 'Processing...' : 'Confirm Cancellation'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal id="change-plan">
+        <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
+          <div>
+            <h3 style={{ margin: 0, marginBottom: 'var(--spacing-sm)' }}>
+              {selectedAction?.type === 'upgrade' ? 'Upgrade' : 'Downgrade'} Plan
+            </h3>
+            <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+              Your plan change will take effect immediately. 
+              {selectedAction?.type === 'upgrade' ? ' You will be charged the prorated amount.' : ' You will receive a credit for the unused portion.'}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)', justifyContent: 'flex-end' }}>
+            <Button variant="ghost" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={confirmAction}
+              disabled={membershipAction.isPending}
+            >
+              {membershipAction.isPending ? 'Processing...' : `Confirm ${selectedAction?.type}`}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

@@ -4,4 +4,5 @@ export const queryKeys = {
   classes: ['classes'] as const,
   activity: ['activity'] as const,
   payments: ['payments'] as const,
+  membership: () => ['membership'] as const,
 }

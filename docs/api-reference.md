@@ -110,52 +110,6 @@ GET /customers/{customerId}/subscriptions
 Authorization: Bearer {accessToken}
 ```
 
-#### Freeze Membership
-```http
-POST /subscriptions/{subscriptionId}/freeze
-Authorization: Bearer {accessToken}
-Content-Type: application/json
-
-{
-  "freezeUntil": "2024-12-31"
-}
-```
-
-#### Unfreeze Membership
-```http
-POST /subscriptions/{subscriptionId}/unfreeze
-Authorization: Bearer {accessToken}
-```
-
-#### Cancel Membership
-```http
-POST /subscriptions/{subscriptionId}/cancel
-Authorization: Bearer {accessToken}
-Content-Type: application/json
-
-{
-  "cancellationDate": "2024-01-31",
-  "reason": "Moving to another city"
-}
-```
-
-#### Change Membership Plan
-```http
-PUT /subscriptions/{subscriptionId}/change-plan
-Authorization: Bearer {accessToken}
-Content-Type: application/json
-
-{
-  "planId": "premium-monthly"
-}
-```
-
-#### List Membership Plans
-```http
-GET /membership/plans
-Authorization: Bearer {accessToken}
-```
-
 ### 4. Resources & Facilities
 
 #### List Available Resources
@@ -172,6 +126,50 @@ Query Parameters:
 - start: ISO date string
 - end: ISO date string
 - resourceId: string
+```
+
+### 5. Membership Management
+
+#### Get Membership Information
+```http
+GET /customers/{customerId}/membership
+Authorization: Bearer {accessToken}
+```
+
+#### Perform Membership Action
+```http
+POST /customers/{customerId}/membership/actions
+Authorization: Bearer {accessToken}
+Content-Type: application/json
+
+{
+  "type": "freeze" | "cancel" | "upgrade" | "downgrade" | "resume",
+  "planId": "string", // required for upgrade/downgrade
+  "reason": "string", // optional
+  "effectiveDate": "2024-01-15", // optional
+  "duration": 30 // optional, for freeze duration in days
+}
+```
+
+#### Get Available Plans
+```http
+GET /membership/plans
+Authorization: Bearer {accessToken}
+```
+
+#### Get Membership Invoices
+```http
+GET /customers/{customerId}/membership/invoices
+Authorization: Bearer {accessToken}
+Query Parameters:
+- limit: number
+- offset: number
+```
+
+#### Download Invoice
+```http
+GET /customers/{customerId}/membership/invoices/{invoiceId}/download
+Authorization: Bearer {accessToken}
 ```
 
 ## Data Models
@@ -232,50 +230,51 @@ interface Payment {
 }
 ```
 
-### Membership
+### Membership Subscription
 ```typescript
-interface Membership {
+interface MembershipSubscription {
   id: string
-  customerId: string
   planId: string
   planName: string
-  status: 'active' | 'frozen' | 'cancelled' | 'expired'
+  status: 'active' | 'paused' | 'cancelled' | 'pending_cancellation'
   startDate: string
   renewalDate: string
-  freezeDate?: string
-  freezeEndDate?: string
-  cancellationDate?: string
-  monthlyPrice: number
+  price: number
   currency: string
-  features: string[]
+  billingCycle: 'monthly' | 'yearly'
+  pausedUntil?: string
+  cancellationDate?: string
+  cancellationReason?: string
 }
 ```
 
-### MembershipPlan
+### Membership Plan
 ```typescript
 interface MembershipPlan {
   id: string
   name: string
   description: string
-  monthlyPrice: number
-  yearlyPrice: number
+  price: number
+  currency: string
+  billingCycle: 'monthly' | 'yearly'
   features: string[]
   isPopular?: boolean
 }
 ```
 
-### Invoice
+### Membership Invoice
 ```typescript
-interface Invoice {
+interface MembershipInvoice {
   id: string
-  membershipId: string
+  subscriptionId: string
   amount: number
   currency: string
-  status: 'paid' | 'pending' | 'overdue' | 'failed'
+  status: 'paid' | 'pending' | 'failed' | 'refunded'
   issueDate: string
   dueDate: string
   paidDate?: string
-  downloadUrl?: string
+  downloadUrl: string
+  description: string
 }
 ```
 

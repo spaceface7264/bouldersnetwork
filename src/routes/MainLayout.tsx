@@ -11,7 +11,7 @@ const navigation = [
   { path: '/announcements', label: 'Announcements', icon: '★' },
   { path: '/classes', label: 'Classes', icon: '●' },
   { path: '/activity', label: 'Activity', icon: '▲' },
-  { path: '/membership', label: 'Membership', icon: '🎫' },
+  { path: '/membership', label: 'Membership', icon: '♠' },
   { path: '/profile', label: 'Profile', icon: '◆' },
   { path: '/payments', label: 'Billing', icon: '♦' },
 ]

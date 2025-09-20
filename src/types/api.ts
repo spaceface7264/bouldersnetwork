@@ -88,3 +88,62 @@ export interface PaymentsResponse {
   paymentMethod: string
   history: PaymentRecord[]
 }
+
+// Membership Management Types
+export interface MembershipPlan {
+  id: string
+  name: string
+  description: string
+  price: number
+  currency: string
+  billingCycle: 'monthly' | 'yearly'
+  features: string[]
+  isPopular?: boolean
+}
+
+export interface MembershipSubscription {
+  id: string
+  planId: string
+  planName: string
+  status: 'active' | 'paused' | 'cancelled' | 'pending_cancellation'
+  startDate: string
+  renewalDate: string
+  price: number
+  currency: string
+  billingCycle: 'monthly' | 'yearly'
+  pausedUntil?: string
+  cancellationDate?: string
+  cancellationReason?: string
+}
+
+export interface MembershipInvoice {
+  id: string
+  subscriptionId: string
+  amount: number
+  currency: string
+  status: 'paid' | 'pending' | 'failed' | 'refunded'
+  issueDate: string
+  dueDate: string
+  paidDate?: string
+  downloadUrl: string
+  description: string
+}
+
+export interface MembershipAction {
+  type: 'freeze' | 'cancel' | 'upgrade' | 'downgrade' | 'resume'
+  planId?: string
+  reason?: string
+  effectiveDate?: string
+  duration?: number // for freeze duration in days
+}
+
+export interface MembershipResponse {
+  currentSubscription: MembershipSubscription
+  availablePlans: MembershipPlan[]
+  recentInvoices: MembershipInvoice[]
+  upcomingPayment?: {
+    amount: number
+    date: string
+    method: string
+  }
+}
