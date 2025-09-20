@@ -9,5 +9,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
-  base: process.env.NODE_ENV === 'production' ? '/BouldersNetwork/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/bouldersnetwork/' : '/',
 })
