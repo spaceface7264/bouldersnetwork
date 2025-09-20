@@ -126,9 +126,18 @@ export function LoginPage() {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: 'var(--color-bg)',
+        position: 'relative',
       }}
     >
+      {/* Animated Gradient Background */}
+      <div className="gradient-bg">
+        <div className="gradient-wave wave-1"></div>
+        <div className="gradient-wave wave-2"></div>
+        <div className="gradient-wave wave-3"></div>
+        <div className="gradient-orb orb-1"></div>
+        <div className="gradient-orb orb-2"></div>
+        <div className="gradient-orb orb-3"></div>
+      </div>
       {/* Header with theme toggle */}
       <header
         style={{
