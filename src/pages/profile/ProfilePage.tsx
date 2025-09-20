@@ -4,11 +4,24 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Toggle } from '@/components/ui/Toggle'
 import { useMemberProfile, useMemberProfileUpdate } from '@/hooks/useMemberProfile'
-import { formatDate } from '@/lib/format'
+import { useDashboardSummary } from '@/hooks/useDashboardSummary'
+import { useActivityData } from '@/hooks/useActivityData'
+import { formatDate, formatTime } from '@/lib/format'
 import { ProfileFormData, MemberProfileUpdate } from '@/types/api'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
 export function ProfilePage() {
-  const { data: member, isLoading } = useMemberProfile()
+  const { data: member, isLoading: memberLoading } = useMemberProfile()
+  const { data: dashboard, isLoading: dashboardLoading } = useDashboardSummary()
+  const { data: activity, isLoading: activityLoading } = useActivityData()
   const updateProfile = useMemberProfileUpdate()
   
   const [isEditing, setIsEditing] = useState(false)
@@ -62,15 +75,19 @@ export function ProfilePage() {
     }
   }, [formData, preferences, member])
 
-  if (isLoading || !member) {
+  const isLoading = memberLoading || dashboardLoading || activityLoading
+
+  if (isLoading || !member || !dashboard || !activity) {
     return (
       <div className="page-container">
         <div style={{ textAlign: 'center', padding: 'var(--spacing-xl)' }}>
-          Loading profile...
+          Loading your complete profile...
         </div>
       </div>
     )
   }
+
+  const membership = dashboard.memberships[0]
 
   const validateForm = (): boolean => {
     const errors: Partial<ProfileFormData> = {}
@@ -180,8 +197,8 @@ export function ProfilePage() {
     <div className="page-container">
       <header className="page-header">
         <div>
-          <h1>Profile & Preferences</h1>
-          <p className="page-description">Manage your personal information and communication preferences</p>
+          <h1>My Profile</h1>
+          <p className="page-description">Your complete member profile, dashboard overview, and activity analytics</p>
         </div>
         <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center' }}>
           {hasUnsavedChanges && (
@@ -409,6 +426,226 @@ export function ProfilePage() {
                   onChange={(value) => handlePreferenceChange('personalCoaching', value)}
                 />
               </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Dashboard Overview Card */}
+        <Card>
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <h2 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Dashboard Overview</h2>
+            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+              Your membership status and recent activity summary
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gap: 'var(--spacing-lg)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            marginBottom: 'var(--spacing-xl)'
+          }}>
+            {/* Membership Status */}
+            <div style={{
+              padding: 'var(--spacing-lg)',
+              background: 'var(--color-surface-muted)',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--color-border)'
+            }}>
+              <h4 style={{ margin: 0, marginBottom: 'var(--spacing-sm)', color: 'var(--color-text-secondary)' }}>
+                Membership
+              </h4>
+              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, marginBottom: 'var(--spacing-xs)' }}>
+                {membership?.name}
+              </div>
+              <div style={{ display: 'grid', gap: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)' }}>
+                <div style={{ color: 'var(--color-text-muted)' }}>
+                  Status: <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>{membership?.status}</span>
+                </div>
+                <div style={{ color: 'var(--color-text-muted)' }}>
+                  Renews: {membership ? formatDate(membership.renewsOn) : '—'}
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Check-ins */}
+            <div style={{
+              padding: 'var(--spacing-lg)',
+              background: 'var(--color-surface-muted)',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--color-border)'
+            }}>
+              <h4 style={{ margin: 0, marginBottom: 'var(--spacing-sm)', color: 'var(--color-text-secondary)' }}>
+                Check-ins This Month
+              </h4>
+              <div style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 700, color: 'var(--color-primary)', marginBottom: 'var(--spacing-xs)' }}>
+                {member.stats.checkInsThisMonth}
+              </div>
+              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                Current streak: {dashboard.stats.currentStreak} days
+              </div>
+            </div>
+
+            {/* Enhanced Classes */}
+            <div style={{
+              padding: 'var(--spacing-lg)',
+              background: 'var(--color-surface-muted)',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--color-border)'
+            }}>
+              <h4 style={{ margin: 0, marginBottom: 'var(--spacing-sm)', color: 'var(--color-text-secondary)' }}>
+                Classes This Month
+              </h4>
+              <div style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 700, color: 'var(--color-success)', marginBottom: 'var(--spacing-xs)' }}>
+                {member.stats.classesAttended}
+              </div>
+              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                Up {dashboard.stats.attendanceChange}% vs last month
+              </div>
+            </div>
+
+            {/* Last Visit */}
+            <div style={{
+              padding: 'var(--spacing-lg)',
+              background: 'var(--color-surface-muted)',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--color-border)'
+            }}>
+              <h4 style={{ margin: 0, marginBottom: 'var(--spacing-sm)', color: 'var(--color-text-secondary)' }}>
+                Last Visit
+              </h4>
+              <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, marginBottom: 'var(--spacing-xs)' }}>
+                {formatDate(dashboard.stats.lastVisit)}
+              </div>
+              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                {member.stats.badgesEarned} badges earned
+              </div>
+            </div>
+          </div>
+
+          {/* Upcoming Classes */}
+          {dashboard.upcomingClasses.length > 0 && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-lg)' }}>
+                <h3 style={{ margin: 0 }}>Upcoming Classes</h3>
+                <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                  {dashboard.upcomingClasses.length} sessions scheduled
+                </span>
+              </div>
+              <div style={{ display: 'grid', gap: 'var(--spacing-sm)' }}>
+                {dashboard.upcomingClasses.map((session) => (
+                  <div
+                    key={session.id}
+                    style={{
+                      display: 'grid',
+                      gap: 'var(--spacing-sm)',
+                      gridTemplateColumns: '2fr 1fr 1fr',
+                      alignItems: 'center',
+                      padding: 'var(--spacing-md)',
+                      background: 'var(--color-surface)',
+                      borderRadius: 'var(--radius)',
+                      border: '1px solid var(--color-border)'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{session.name}</div>
+                      <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                        with {session.instructor}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 500 }}>{formatDate(session.startTime)}</div>
+                      <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                        {formatTime(session.startTime)} · {session.durationMinutes} mins
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right', color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                      {session.spotsRemaining} spots left
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* Activity & Analytics Card */}
+        <Card>
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <h2 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Activity & Analytics</h2>
+            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+              Your climbing activity and progress over time
+            </p>
+          </div>
+
+          {/* Monthly Visits Chart */}
+          <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+            <h3 style={{ margin: 0, marginBottom: 'var(--spacing-md)' }}>Monthly Visits</h3>
+            <div style={{ height: 280, background: 'var(--color-surface)', borderRadius: 'var(--radius)', padding: 'var(--spacing-md)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={activity.monthlyVisits}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.2)" />
+                  <XAxis
+                    dataKey="month"
+                    stroke="var(--color-text-muted)"
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                  />
+                  <YAxis
+                    stroke="var(--color-text-muted)"
+                    allowDecimals={false}
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                  />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(56, 189, 248, 0.1)' }}
+                    contentStyle={{
+                      background: 'var(--color-surface)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius)',
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  />
+                  <Bar dataKey="visits" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div>
+            <h3 style={{ margin: 0, marginBottom: 'var(--spacing-md)' }}>Recent Activity</h3>
+            <div style={{ display: 'grid', gap: 'var(--spacing-sm)' }}>
+              {activity.recentActivity.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: 'var(--spacing-md)',
+                    background: 'var(--color-surface)',
+                    borderRadius: 'var(--radius)',
+                    border: '1px solid var(--color-border)'
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{item.type}</div>
+                    <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                      {item.description}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', color: 'var(--color-text-muted)' }}>
+                    <div style={{ fontWeight: 500 }}>{formatDate(item.date)}</div>
+                    <div style={{ fontSize: 'var(--font-size-sm)' }}>
+                      {item.value} {item.unit}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </Card>

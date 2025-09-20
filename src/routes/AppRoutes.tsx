@@ -14,16 +14,17 @@ export function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route element={<MainLayout />}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route index element={<Navigate to="/profile" replace />} />
+        {/* Redirect old dashboard and activity routes to profile */}
+        <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+        <Route path="/activity" element={<Navigate to="/profile" replace />} />
         <Route path="/announcements" element={<AnnouncementsPage />} />
         <Route path="/classes" element={<ClassesPage />} />
-        <Route path="/activity" element={<ActivityPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/payments" element={<PaymentsPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/profile" replace />} />
     </Routes>
   )
 }
