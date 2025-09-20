@@ -12,7 +12,7 @@ const delay = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms))
 let memberProfile: MemberProfile = {
   id: 'member-001',
   name: 'Alex Johnson',
-  avatarUrl: 'https://avatars.dicebear.com/api/initials/AJ.svg',
+  avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
   membershipTier: 'Unlimited',
   joinDate: '2021-03-15',
   nextBillingDate: '2024-08-01',

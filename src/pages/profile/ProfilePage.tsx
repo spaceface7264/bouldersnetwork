@@ -201,205 +201,213 @@ export function ProfilePage() {
               </Button>
             </>
           )}
-          {!hasUnsavedChanges && (
+          {!hasUnsavedChanges && !isEditing && (
             <Button 
-              variant={isEditing ? "secondary" : "primary"}
-              onClick={() => setIsEditing(!isEditing)}
+              variant="primary"
+              onClick={() => setIsEditing(true)}
             >
-              {isEditing ? 'Done Editing' : 'Edit Profile'}
+              Edit Profile
+            </Button>
+          )}
+          {!hasUnsavedChanges && isEditing && (
+            <Button 
+              variant="secondary"
+              onClick={() => setIsEditing(false)}
+            >
+              Cancel Edit
             </Button>
           )}
         </div>
       </header>
 
       <div style={{ display: 'grid', gap: 'var(--spacing-xl)' }}>
-        {/* Personal Information */}
+        {/* Profile Overview Card */}
         <Card>
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <h2 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Personal Information</h2>
-            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-              Your basic profile information and contact details
-            </p>
-          </div>
-          
-          <div style={{
-            display: 'grid',
-            gap: 'var(--spacing-lg)',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))'
-          }}>
-            <Input
-              label="Full Name"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              readOnly={!isEditing}
-              required
-              error={formErrors.name}
-            />
-            <Input
-              label="Email Address"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              readOnly={!isEditing}
-              required
-              error={formErrors.email}
-            />
-            <Input
-              label="Phone Number"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              readOnly={!isEditing}
-              required
-              error={formErrors.phone}
-            />
+          <div className="profile-overview-grid" style={{ display: 'grid', gap: 'var(--spacing-xl)', gridTemplateColumns: 'auto 1fr auto' }}>
+            {/* Profile Picture */}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div className="profile-picture">
+                {member.avatarUrl ? (
+                  <img 
+                    src={member.avatarUrl} 
+                    alt={`${member.name}'s profile`}
+                  />
+                ) : (
+                  <div className="profile-picture-initials">
+                    {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Basic Info & Contact */}
+            <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
+                  <h2 style={{ margin: 0, fontSize: 'var(--font-size-xl)' }}>{member.name}</h2>
+                  {getStatusBadge(member.membershipTier)}
+                </div>
+                <div style={{ 
+                  display: 'grid', 
+                  gap: 'var(--spacing-sm)', 
+                  color: 'var(--color-text-secondary)', 
+                  fontSize: 'var(--font-size-sm)' 
+                }}>
+                  <div>📧 {member.email}</div>
+                  <div>📱 {member.phone}</div>
+                  <div>📅 Member since {formatDate(member.joinDate)}</div>
+                  <div>💳 Next billing: {formatDate(member.nextBillingDate)}</div>
+                </div>
+              </div>
+
+              {/* Editable Personal Information */}
+              {isEditing && (
+                <div style={{
+                  display: 'grid',
+                  gap: 'var(--spacing-md)',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                  padding: 'var(--spacing-lg)',
+                  background: 'var(--color-surface-muted)',
+                  borderRadius: 'var(--radius)',
+                  border: '1px solid var(--color-border)'
+                }}>
+                  <Input
+                    label="Full Name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    required
+                    error={formErrors.name}
+                  />
+                  <Input
+                    label="Email Address"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    required
+                    error={formErrors.email}
+                  />
+                  <Input
+                    label="Phone Number"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    required
+                    error={formErrors.phone}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Member Stats */}
+            <div className="profile-stats" style={{
+              display: 'grid',
+              gap: 'var(--spacing-md)',
+              gridTemplateColumns: '1fr',
+              textAlign: 'center',
+              minWidth: '160px'
+            }}>
+              <div>
+                <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-primary)' }}>
+                  {member.stats.checkInsThisMonth}
+                </div>
+                <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)' }}>
+                  Check-ins
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-success)' }}>
+                  {member.stats.classesAttended}
+                </div>
+                <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)' }}>
+                  Classes
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-warning)' }}>
+                  {member.stats.badgesEarned}
+                </div>
+                <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)' }}>
+                  Badges
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
 
-        {/* Membership Information */}
+        {/* Emergency Contact & Preferences Card */}
         <Card>
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <h2 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Membership Information</h2>
-            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-              Your membership details and billing information
-            </p>
-          </div>
-          
-          <div style={{
-            display: 'grid',
-            gap: 'var(--spacing-lg)',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))'
-          }}>
+          <div className="emergency-preferences-grid" style={{ display: 'grid', gap: 'var(--spacing-xl)', gridTemplateColumns: '1fr 1fr' }}>
+            {/* Emergency Contact */}
             <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: 'var(--spacing-xs)', 
-                fontSize: 'var(--font-size-sm)', 
-                fontWeight: 600,
-                color: 'var(--color-text-secondary)'
-              }}>
-                Membership Type
-              </label>
-              {getStatusBadge(member.membershipTier)}
+              <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                <h3 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Emergency Contact</h3>
+                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                  Contact information for emergencies
+                </p>
+              </div>
+              
+              {isEditing ? (
+                <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
+                  <Input
+                    label="Contact Name"
+                    value={formData.emergencyContactName}
+                    onChange={(e) => handleInputChange('emergencyContactName', e.target.value)}
+                    required
+                    error={formErrors.emergencyContactName}
+                  />
+                  <Input
+                    label="Contact Phone"
+                    type="tel"
+                    value={formData.emergencyContactPhone}
+                    onChange={(e) => handleInputChange('emergencyContactPhone', e.target.value)}
+                    required
+                    error={formErrors.emergencyContactPhone}
+                  />
+                </div>
+              ) : (
+                <div style={{ 
+                  display: 'grid', 
+                  gap: 'var(--spacing-sm)', 
+                  color: 'var(--color-text-secondary)', 
+                  fontSize: 'var(--font-size-sm)' 
+                }}>
+                  <div><strong>{member.emergencyContact.name}</strong></div>
+                  <div>📱 {member.emergencyContact.phone}</div>
+                </div>
+              )}
             </div>
-            <Input
-              label="Member Since"
-              value={formatDate(member.joinDate)}
-              readOnly
-            />
-            <Input
-              label="Next Billing Date"
-              value={formatDate(member.nextBillingDate)}
-              readOnly
-            />
-          </div>
-        </Card>
 
-        {/* Emergency Contact */}
-        <Card>
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <h2 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Emergency Contact</h2>
-            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-              Contact information for emergencies
-            </p>
-          </div>
-          
-          <div style={{
-            display: 'grid',
-            gap: 'var(--spacing-lg)',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            maxWidth: '600px'
-          }}>
-            <Input
-              label="Contact Name"
-              value={formData.emergencyContactName}
-              onChange={(e) => handleInputChange('emergencyContactName', e.target.value)}
-              readOnly={!isEditing}
-              required
-              error={formErrors.emergencyContactName}
-            />
-            <Input
-              label="Contact Phone"
-              type="tel"
-              value={formData.emergencyContactPhone}
-              onChange={(e) => handleInputChange('emergencyContactPhone', e.target.value)}
-              readOnly={!isEditing}
-              required
-              error={formErrors.emergencyContactPhone}
-            />
-          </div>
-        </Card>
-
-        {/* Communication Preferences */}
-        <Card>
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <h2 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Communication Preferences</h2>
-            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-              Choose how we can contact you
-            </p>
-          </div>
-          
-          <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
-            <Toggle
-              id="pref-newsletter"
-              label="Community Newsletter"
-              description="Monthly round-up of events, classes, and competition highlights"
-              checked={preferences.newsletter}
-              onChange={(value) => handlePreferenceChange('newsletter', value)}
-            />
-            <Toggle
-              id="pref-reminders"
-              label="Class Reminders"
-              description="Reminders 24 hours before your scheduled classes"
-              checked={preferences.reminders}
-              onChange={(value) => handlePreferenceChange('reminders', value)}
-            />
-            <Toggle
-              id="pref-coaching"
-              label="Personal Coaching Offers"
-              description="Occasional opportunities to work 1:1 with our coaches"
-              checked={preferences.personalCoaching}
-              onChange={(value) => handlePreferenceChange('personalCoaching', value)}
-            />
-          </div>
-        </Card>
-
-        {/* Member Stats */}
-        <Card>
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <h2 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Your Stats</h2>
-            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-              Your activity summary
-            </p>
-          </div>
-          
-          <div style={{
-            display: 'grid',
-            gap: 'var(--spacing-lg)',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 700, color: 'var(--color-primary)' }}>
-                {member.stats.checkInsThisMonth}
+            {/* Communication Preferences */}
+            <div>
+              <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                <h3 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Communication Preferences</h3>
+                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                  Choose how we can contact you
+                </p>
               </div>
-              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-                Check-ins This Month
-              </div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 700, color: 'var(--color-success)' }}>
-                {member.stats.classesAttended}
-              </div>
-              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-                Classes Attended
-              </div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 700, color: 'var(--color-warning)' }}>
-                {member.stats.badgesEarned}
-              </div>
-              <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-                Badges Earned
+              
+              <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
+                <Toggle
+                  id="pref-newsletter"
+                  label="Community Newsletter"
+                  description="Monthly round-up of events and highlights"
+                  checked={preferences.newsletter}
+                  onChange={(value) => handlePreferenceChange('newsletter', value)}
+                />
+                <Toggle
+                  id="pref-reminders"
+                  label="Class Reminders"
+                  description="24-hour class reminders"
+                  checked={preferences.reminders}
+                  onChange={(value) => handlePreferenceChange('reminders', value)}
+                />
+                <Toggle
+                  id="pref-coaching"
+                  label="Personal Coaching Offers"
+                  description="1:1 coaching opportunities"
+                  checked={preferences.personalCoaching}
+                  onChange={(value) => handlePreferenceChange('personalCoaching', value)}
+                />
               </div>
             </div>
           </div>
